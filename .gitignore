@@ -1,0 +1,5 @@
+node_modules/
+windows/dist/
+android/.gradle/
+android/build/
+android/app/build/

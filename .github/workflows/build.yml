@@ -1,0 +1,77 @@
+# Fabrique NEXUS.apk (Android) et NEXUS.exe (Windows), puis les dépose dans downloads/
+name: Fabriquer les applis
+
+on:
+  push:
+    branches: [main]
+    paths: ['android/**', 'windows/**', 'shared/**', '.github/workflows/build.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apps
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.7' }
+      - name: Copier l'écran d'adresse
+        run: cp shared/setup.html android/app/src/main/assets/setup.html
+      - name: Construire l'APK
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
+      - run: cp android/app/build/outputs/apk/release/app-release.apk NEXUS.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: apk, path: NEXUS.apk }
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Copier l'écran d'adresse
+        run: copy shared\setup.html windows\setup.html
+      - name: Construire l'EXE
+        working-directory: windows
+        run: |
+          npm install --no-audit --no-fund
+          npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with: { name: exe, path: windows/dist/NEXUS.exe }
+
+  publier:
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: out }
+      - name: Déposer les fichiers dans downloads/
+        run: |
+          mkdir -p downloads
+          cp out/apk/NEXUS.apk downloads/NEXUS.apk
+          cp out/exe/NEXUS.exe downloads/NEXUS.exe
+          ls -la downloads
+          cat > downloads/infos.json <<JSON
+          {"date":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","apk_mo":$(( $(stat -c%s downloads/NEXUS.apk) / 1048576 )),"exe_mo":$(( $(stat -c%s downloads/NEXUS.exe) / 1048576 )),"sha256_apk":"$(sha256sum downloads/NEXUS.apk | cut -d' ' -f1)","sha256_exe":"$(sha256sum downloads/NEXUS.exe | cut -d' ' -f1)"}
+          JSON
+          cat downloads/infos.json
+      - name: Enregistrer dans le dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads
+          git commit -m "Nouvelles versions de NEXUS.apk et NEXUS.exe" || echo "Rien de nouveau"
+          git push

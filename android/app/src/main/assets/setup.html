@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEXUS CONTROL</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #060a10; color: #d3e1ec; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: grid; place-items: center; padding: 24px;
+    background: radial-gradient(700px 400px at 80% -10%, rgba(62,243,255,.14), transparent 60%), radial-gradient(600px 380px at -10% 110%, rgba(166,107,255,.12), transparent 60%), #060a10; }
+  main { width: min(420px, 100%); display: grid; gap: 14px; }
+  .logo { width: 72px; height: 72px; margin: 0 auto; filter: drop-shadow(0 0 16px rgba(62,243,255,.55)); }
+  h1 { margin: 0; text-align: center; letter-spacing: .22em; font-size: 26px; }
+  h1 span { display: block; font-size: 11px; letter-spacing: .5em; color: #3ef3ff; }
+  p { margin: 0; color: #8fa3b8; font-size: 14px; text-align: center; }
+  label { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #7488a0; font-family: ui-monospace, monospace; }
+  input { width: 100%; min-height: 50px; padding: 12px 14px; font-size: 16px; color: #e8f4ff; background: rgba(3,7,12,.8); border: 1px solid rgba(62,243,255,.4); outline: none; }
+  input:focus { border-color: #3ef3ff; box-shadow: 0 0 0 3px rgba(62,243,255,.15); }
+  button { min-height: 52px; border: 0; cursor: pointer; font: 700 16px system-ui; letter-spacing: .05em; color: #03121a;
+    background: linear-gradient(120deg, #3ef3ff, #8a8cff); clip-path: polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
+  .err { padding: 10px 12px; border-left: 3px solid #ff4d6d; background: rgba(255,77,109,.08); color: #ffc2cf; font-size: 14px; text-align: left; }
+  .help { font-size: 13px; text-align: left; color: #7488a0; }
+  .help b { color: #b9cadb; }
+</style>
+</head>
+<body>
+<main id="form" hidden>
+  <img class="logo" src="icon.png" alt="">
+  <h1>NEXUS <span>CONTROL</span></h1>
+  <p>Première ouverture : indique l'adresse de ton NEXUS.</p>
+  <div class="err" id="err" hidden></div>
+  <label for="url">Adresse de ton NEXUS</label>
+  <input id="url" type="url" inputmode="url" autocomplete="url" placeholder="https://ton-nexus.onrender.com">
+  <button id="go">Se connecter</button>
+  <p class="help">Où la trouver ? Sur <b>dashboard.render.com</b> → service <b>nexus-control</b> → le lien bleu qui finit par <b>.onrender.com</b>.</p>
+</main>
+<script>
+  // Mémorise l'adresse de NEXUS puis l'ouvre. ?error=… → on redemande l'adresse.
+  var KEY = 'nexus_url';
+  var params = new URLSearchParams(location.search);
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var errType = params.get('error');
+  function show(msg) {
+    document.getElementById('form').hidden = false;
+    var input = document.getElementById('url');
+    input.value = saved || 'https://';
+    if (msg) { var e = document.getElementById('err'); e.textContent = msg; e.hidden = false; }
+  }
+  function normalize(v) {
+    v = (v || '').trim().replace(/\/+$/, '');
+    if (!v) return null;
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    try { var u = new URL(v); return u.protocol + '//' + u.host; } catch (e) { return null; }
+  }
+  document.getElementById('go').addEventListener('click', function () {
+    var url = normalize(document.getElementById('url').value);
+    if (!url || url === 'https://') { show('Adresse invalide. Exemple : https://nexus-control-ab12.onrender.com'); return; }
+    try { localStorage.setItem(KEY, url); } catch (e) {}
+    location.href = url + '/';
+  });
+  document.getElementById('url').addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('go').click(); });
+  if (errType === '404') show('« Not Found » : aucune appli à cette adresse. Vérifie l’adresse dans Render.');
+  else if (errType === 'offline') show('Impossible de joindre NEXUS. Vérifie ta connexion ou l’adresse (le serveur gratuit peut mettre ~50 s à se réveiller).');
+  else if (errType === 'change') show();
+  else if (saved) location.replace(saved + '/');
+  else show();
+</script>
+</body>
+</html>

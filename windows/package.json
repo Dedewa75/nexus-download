@@ -1,0 +1,25 @@
+{
+  "name": "nexus-control-desktop",
+  "productName": "NEXUS",
+  "version": "1.0.0",
+  "description": "NEXUS CONTROL pour Windows",
+  "main": "main.js",
+  "author": "Dedewa75",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "be.dedewa.nexus",
+    "productName": "NEXUS",
+    "files": ["main.js", "setup.html", "icon.png"],
+    "win": { "target": "portable", "icon": "icon.png" },
+    "portable": { "artifactName": "NEXUS.exe" },
+    "directories": { "output": "dist" }
+  }
+}
