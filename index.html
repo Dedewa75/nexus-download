@@ -107,8 +107,8 @@
   first.insertAdjacentHTML('beforeend', '<span class="tag">TON APPAREIL</span>');
   document.getElementById('cards').prepend(first);
   fetch('downloads/infos.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (i) {
-    document.getElementById('apk-size').textContent = 'APK · ' + Math.max(1, i.apk_mo) + ' Mo';
-    document.getElementById('exe-size').textContent = 'EXE · ' + Math.max(1, i.exe_mo) + ' Mo';
+    document.getElementById('apk-size').textContent = 'APK · ' + (i.apk_mo < 1 ? '< 1 Mo' : i.apk_mo + ' Mo');
+    document.getElementById('exe-size').textContent = 'EXE · ' + (i.exe_mo < 1 ? '< 1 Mo' : i.exe_mo + ' Mo');
     document.getElementById('foot').textContent = 'Version du ' + new Date(i.date).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' }) + ' · SHA-256 APK ' + i.sha256_apk.slice(0, 16) + '… · EXE ' + i.sha256_exe.slice(0, 16) + '…';
   }).catch(function () {
     ['apk', 'exe'].forEach(function (k) { var b = document.getElementById(k + '-btn'); b.classList.add('off'); b.textContent = '⏳ Fichier en cours de fabrication…'; });
