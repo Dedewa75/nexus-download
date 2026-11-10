@@ -31,7 +31,7 @@
   <p>Première ouverture : indique l'adresse de ton NEXUS.</p>
   <div class="err" id="err" hidden></div>
   <label for="url">Adresse de ton NEXUS</label>
-  <input id="url" type="url" inputmode="url" autocomplete="url" placeholder="https://ton-nexus.onrender.com">
+  <input id="url" type="url" inputmode="url" autocomplete="url" placeholder="https://nexus-control-fzxd.onrender.com">
   <button id="go">Se connecter</button>
   <p class="help">Où la trouver ? Sur <b>dashboard.render.com</b> → service <b>nexus-control</b> → le lien bleu qui finit par <b>.onrender.com</b>.</p>
 </main>
@@ -45,7 +45,7 @@
   function show(msg) {
     document.getElementById('form').hidden = false;
     var input = document.getElementById('url');
-    input.value = saved || 'https://';
+    input.value = saved || 'https://nexus-control-fzxd.onrender.com';
     if (msg) { var e = document.getElementById('err'); e.textContent = msg; e.hidden = false; }
   }
   function normalize(v) {
