@@ -38,6 +38,7 @@
 <script>
   // Mémorise l'adresse de NEXUS puis l'ouvre. ?error=… → on redemande l'adresse.
   var KEY = 'nexus_url';
+  var DEFAULT = 'https://nexus-control-fzxd.onrender.com';
   var params = new URLSearchParams(location.search);
   var saved = null;
   try { saved = localStorage.getItem(KEY); } catch (e) {}
@@ -64,8 +65,7 @@
   if (errType === '404') show('« Not Found » : aucune appli à cette adresse. Vérifie l’adresse dans Render.');
   else if (errType === 'offline') show('Impossible de joindre NEXUS. Vérifie ta connexion ou l’adresse (le serveur gratuit peut mettre ~50 s à se réveiller).');
   else if (errType === 'change') show();
-  else if (saved) location.replace(saved + '/');
-  else show();
+  else location.replace((saved || DEFAULT) + '/'); // ouverture directe de NEXUS
 </script>
 </body>
 </html>

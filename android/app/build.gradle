@@ -10,15 +10,24 @@ android {
         applicationId 'be.dedewa.nexus'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode 2
+        versionName '1.1'
+    }
+
+    // clé fixe : les prochaines versions s'installent par-dessus sans désinstaller
+    signingConfigs {
+        nexus {
+            storeFile rootProject.file('nexus.keystore')
+            storePassword 'nexus-dedewa'
+            keyAlias 'nexus'
+            keyPassword 'nexus-dedewa'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            // signé avec la clé de debug : installable directement depuis le téléphone
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.nexus
         }
     }
 
